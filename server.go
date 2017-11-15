@@ -3,6 +3,8 @@ package main
 import (
 	"html/template"
 	"net/http"
+
+	"github.com/mattkelly/url-shortener-go/shorten"
 )
 
 func main() {
@@ -14,12 +16,14 @@ func main() {
 			return
 		}
 
-		longUrlFromForm := r.FormValue("long-url")
+		longUrl := r.FormValue("long-url")
+
+		shortUrl := shorten.Shorten(longUrl)
 
 		tmpl.Execute(w, struct {
-			Success bool
-			LongUrl string
-		}{true, longUrlFromForm})
+			Success  bool
+			ShortUrl string
+		}{true, shortUrl})
 	})
 
 	http.ListenAndServe(":8080", nil)
