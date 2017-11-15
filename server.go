@@ -1,15 +1,26 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"net/http"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "You're viewing %s", r.URL.Path)
-}
-
 func main() {
-	http.HandleFunc("/", handler)
+	tmpl := template.Must(template.ParseFiles("url_form.html"))
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			tmpl.Execute(w, nil)
+			return
+		}
+
+		longUrlFromForm := r.FormValue("long-url")
+
+		tmpl.Execute(w, struct {
+			Success bool
+			LongUrl string
+		}{true, longUrlFromForm})
+	})
+
 	http.ListenAndServe(":8080", nil)
 }

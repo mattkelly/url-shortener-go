@@ -1,0 +1,9 @@
+{{if .Success}}
+    <p>Success! URL to shorten is {{.LongUrl}}</p>
+{{else}}
+    <h1>URL Shortener</h1>
+    <form method="POST">
+        <label>URL to shorten:</label><br />
+        <input type="text" name="long-url"><br />
+    </form>
+{{end}}
