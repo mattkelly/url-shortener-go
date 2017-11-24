@@ -4,27 +4,55 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/gorilla/mux"
+	"github.com/mattkelly/url-shortener-go/db"
 	"github.com/mattkelly/url-shortener-go/shorten"
 )
 
+// TODO globals are lame
+var tmpl *template.Template
+
+func baseHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	longUrl := r.FormValue("long-url")
+
+	shortUrl := shorten.Shorten(longUrl)
+
+	tmpl.Execute(w, struct {
+		Success  bool
+		ShortUrl string
+	}{true, shortUrl})
+}
+
+func lookupLongUrl(slug string) (string, error) {
+	return db.Get(slug)
+}
+
+func shortUrlHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	longUrl, err := lookupLongUrl(slug)
+	if err != nil {
+		// TODO
+	}
+
+	http.Redirect(w, r, longUrl, http.StatusMovedPermanently)
+}
+
 func main() {
-	tmpl := template.Must(template.ParseFiles("url_form.html"))
+	db.Init()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			tmpl.Execute(w, nil)
-			return
-		}
+	tmpl = template.Must(template.ParseFiles("url_form.html"))
 
-		longUrl := r.FormValue("long-url")
+	r := mux.NewRouter()
 
-		shortUrl := shorten.Shorten(longUrl)
+	r.HandleFunc("/", baseHandler)
+	r.HandleFunc("/{slug:[a-zA-Z0-9]+}", shortUrlHandler)
 
-		tmpl.Execute(w, struct {
-			Success  bool
-			ShortUrl string
-		}{true, shortUrl})
-	})
-
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":3000", r)
 }
