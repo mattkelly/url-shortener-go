@@ -38,7 +38,8 @@ func shortUrlHandler(w http.ResponseWriter, r *http.Request) {
 
 	longUrl, err := lookupLongUrl(slug)
 	if err != nil {
-		// TODO
+		// TODO display error message to user
+		panic(err)
 	}
 
 	http.Redirect(w, r, longUrl, http.StatusMovedPermanently)

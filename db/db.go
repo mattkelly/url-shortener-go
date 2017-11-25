@@ -9,6 +9,7 @@ import (
 var client *redis.Client
 
 func Init() {
+	// TODO accept redis config
 	client = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
@@ -20,10 +21,10 @@ func Set(key, value string) error {
 	return client.Set(key, value, 0).Err()
 }
 
-func Exists(key string) bool {
-	return client.Exists().Val() != 0
-}
-
 func Get(key string) (string, error) {
 	return client.Get(key).Result()
+}
+
+func Exists(key string) bool {
+	return client.Exists().Val() != 0
 }

@@ -3,6 +3,8 @@ package shorten
 import (
 	"math/rand"
 
+	// TODO should shorten module know about db or instead do
+	// dupe checking at higher layer?
 	"github.com/mattkelly/url-shortener-go/db"
 )
 
@@ -33,6 +35,7 @@ func Shorten(longUrl string) string {
 
 	err := db.Set(shortUrl, longUrl)
 	if err != nil {
+		// TODO don't just panic here
 		panic(err)
 	}
 
